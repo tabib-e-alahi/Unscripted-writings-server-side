@@ -6,6 +6,7 @@ const port = process.env.PORT || 5000;
 
 //middleware
 app.use(cors());
+app.use(express.json())
 
 // console.log(process.env.DB_User);
 
@@ -29,6 +30,7 @@ async function run() {
     await client.connect();
 
     const blogCollection = client.db("blogsDB").collection("blogs");
+    const wishlistCollection = client.db("blogsDB").collection("wishlist");
 
     app.get("/blog", async (req, res) => {
       const cursor = blogCollection.find();
@@ -78,6 +80,29 @@ async function run() {
       const limitedResult = result.slice(0, limit);
 
       res.send(limitedResult);
+    });
+
+    app.get("/blog/category", async (req, res) => {
+      const pipeline = [
+        {
+          $group: {
+            _id: "$category",
+          },
+        },
+      ];
+
+      const distinctCategories = await blogCollection
+        .aggregate(pipeline)
+        .toArray();
+      const categories = distinctCategories.map((category) => category._id);
+      res.send(categories);
+    });
+
+    // app.get('/')
+
+    app.post("/wishlist", async (req, res) => {
+      const newWish = req.body;
+      console.log("Form Api : ", req.body);
     });
 
     // Send a ping to confirm a successful connection
