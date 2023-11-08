@@ -98,11 +98,25 @@ async function run() {
       res.send(categories);
     });
 
-    // app.get('/')
+    app.get("/wishlist", async (req, res) => {
+      const email = req?.query?.email;
+      let query = {}
+      if(email){
+        query = {
+          user_email : email
+        }
+
+      }
+      // console.log("Form Api : ", req.body);
+      const result = await wishlistCollection.find(query).toArray();
+      res.send(result)
+    });
 
     app.post("/wishlist", async (req, res) => {
       const newWish = req.body;
-      console.log("Form Api : ", req.body);
+      // console.log("Form Api : ", req.body);
+      const result = await wishlistCollection.insertOne(newWish);
+      res.send(result)
     });
 
     // Send a ping to confirm a successful connection
