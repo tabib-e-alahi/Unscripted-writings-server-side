@@ -31,6 +31,7 @@ async function run() {
 
     const blogCollection = client.db("blogsDB").collection("blogs");
     const wishlistCollection = client.db("blogsDB").collection("wishlist");
+    const commentCollection = client.db("blogsDB").collection("comments");
 
     app.get("/blog", async (req, res) => {
       const cursor = blogCollection.find();
@@ -99,7 +100,7 @@ async function run() {
     });
 
     app.get("/wishlist", async (req, res) => {
-      const email = req?.query?.email;
+      const email = req.query?.email;
       let query = {}
       if(email){
         query = {
@@ -114,19 +115,34 @@ async function run() {
 
     app.get('/blogDetails/:id', async(req, res) =>{
       const id = req.params.id;
-      console.log(id);
-      
-
+      // console.log(id);
       const query = {_id: new ObjectId(id)}
 
       const result = await blogCollection.findOne(query);
       res.send(result)
     })
 
+    app.get("/comments", async (req, res) => {
+      let query = {}
+      if(req.query?.blog_id){
+        query = {blog_id:req.query.blog_id}
+      }
+      // console.log("Form Api : ", req.body);
+      const result = await commentCollection.find(query).limit(4).toArray();
+      res.send(result)
+    });
+
     app.post("/wishlist", async (req, res) => {
       const newWish = req.body;
       // console.log("Form Api : ", req.body);
       const result = await wishlistCollection.insertOne(newWish);
+      res.send(result)
+    });
+
+    app.post("/comments", async (req, res) => {
+      const newComment = req.body;
+      // console.log("Form Api : ", req.body);
+      const result = await commentCollection.insertOne(newComment);
       res.send(result)
     });
 
