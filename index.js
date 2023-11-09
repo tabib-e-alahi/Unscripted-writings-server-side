@@ -99,6 +99,29 @@ async function run() {
       res.send(categories);
     });
 
+    app.get("/topTen", async (req, res) => {
+      const pipeline = [
+      {
+        $project: {
+          _id: 1,
+          title:1,
+          author_info:1,
+          long_description: 1,
+          long_description_length: { $strLenCP: '$long_description' }
+        }
+      },
+      {
+        $sort: { long_description_length: -1 }
+      },
+      {
+        $limit: 10
+      }
+    ];
+
+    const result = await blogCollection.aggregate(pipeline).toArray();
+      res.send(result);
+    });
+
     app.get("/wishlist", async (req, res) => {
       const email = req.query?.email;
       let query = {};
@@ -169,6 +192,15 @@ async function run() {
       const result = await blogCollection.updateOne(filter, blog, options);
       res.send(result);
     });
+
+    app.delete("/wish/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+    const result = await wishlistCollection.deleteOne(query);
+      
+      res.send(result);
+    });
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
