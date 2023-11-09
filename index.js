@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+// const jwt = require('jsonwebtoken')
+// const cookieParser = require('cookie-parser')
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -7,6 +9,7 @@ const port = process.env.PORT || 5000;
 //middleware
 app.use(cors());
 app.use(express.json());
+// app.use(cookieParser())
 
 // console.log(process.env.DB_User);
 
@@ -24,6 +27,33 @@ const client = new MongoClient(uri, {
   },
 });
 
+
+
+// const logger = (req, res, next) =>{
+//   console.log('log: info ', req.method, req.url);
+//   next();
+// }
+
+// const verifyToken = (req, res, next) =>{
+//   const token = req?.cookies?.token;
+//   console.log('In the middleware : ', token);
+
+//   if(!token){
+//     return res.status(401).send({message: 'unauthorized access'});
+//   }
+
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,(err,decoded) =>{
+//     if(err){
+//       return res.status(401).send({message: 'unauthorized access'});
+//     }
+//     req.use = decoded;
+//     next()
+//   })
+// }
+
+
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -33,6 +63,31 @@ async function run() {
     const wishlistCollection = client.db("blogsDB").collection("wishlist");
     const commentCollection = client.db("blogsDB").collection("comments");
 
+
+// //  auth api related============
+// app.post('/jwt',logger, async(req,res) =>{
+//   const user = req.body;
+//   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1hr'})
+
+//   res.cookie('token',token,{
+//     httpOnly:true,
+//     secure:true,
+//     sameSite:'none'
+//   })
+//   .send({success: true})
+
+// })
+
+// app.post('/logout', async(req,res) =>{
+//   const user = req.body;
+//   console.log('Form logout api',user);
+//   res.clearCookie('token',{maxAge: 0}).send({success: true})
+
+// })
+
+
+
+    // data related api===========
     app.get("/blog", async (req, res) => {
       const cursor = blogCollection.find();
       const result = await cursor.toArray();
@@ -123,6 +178,7 @@ async function run() {
     });
 
     app.get("/wishlist", async (req, res) => {
+      // console.log(req.cookies);
       const email = req.query?.email;
       let query = {};
       if (email) {
