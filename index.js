@@ -6,7 +6,7 @@ const port = process.env.PORT || 5000;
 
 //middleware
 app.use(cors());
-app.use(express.json())
+app.use(express.json());
 
 // console.log(process.env.DB_User);
 
@@ -101,49 +101,73 @@ async function run() {
 
     app.get("/wishlist", async (req, res) => {
       const email = req.query?.email;
-      let query = {}
-      if(email){
+      let query = {};
+      if (email) {
         query = {
-          user_email : email
-        }
-
+          user_email: email,
+        };
       }
       // console.log("Form Api : ", req.body);
       const result = await wishlistCollection.find(query).toArray();
-      res.send(result)
+      res.send(result);
     });
 
-    app.get('/blogDetails/:id', async(req, res) =>{
+    app.get("/blogDetails/:id", async (req, res) => {
       const id = req.params.id;
       // console.log(id);
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) };
 
       const result = await blogCollection.findOne(query);
-      res.send(result)
-    })
+      res.send(result);
+    });
 
     app.get("/comments", async (req, res) => {
-      let query = {}
-      if(req.query?.blog_id){
-        query = {blog_id:req.query.blog_id}
+      let query = {};
+      if (req.query?.blog_id) {
+        query = { blog_id: req.query.blog_id };
       }
       // console.log("Form Api : ", req.body);
       const result = await commentCollection.find(query).limit(4).toArray();
-      res.send(result)
+      res.send(result);
+    });
+
+    app.post("/blog", async (req, res) => {
+      const newBlog = req.body;
+      const result = await blogCollection.insertOne(newBlog);
+      res.send(result);
     });
 
     app.post("/wishlist", async (req, res) => {
       const newWish = req.body;
       // console.log("Form Api : ", req.body);
       const result = await wishlistCollection.insertOne(newWish);
-      res.send(result)
+      res.send(result);
     });
 
     app.post("/comments", async (req, res) => {
       const newComment = req.body;
       // console.log("Form Api : ", req.body);
       const result = await commentCollection.insertOne(newComment);
-      res.send(result)
+      res.send(result);
+    });
+
+    app.put("/blogDetails/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedBlog = req.body;
+      const blog = {
+        $set: {
+          title: updatedBlog.title,
+          image: updatedBlog.image,
+          category: updatedBlog.category,
+          short_description: updatedBlog.short_description,
+          long_description: updatedBlog.long_description,
+        },
+      };
+
+      const result = await blogCollection.updateOne(filter, blog, options);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
