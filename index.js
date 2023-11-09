@@ -10,7 +10,7 @@ app.use(express.json())
 
 // console.log(process.env.DB_User);
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const uri = `mongodb+srv://${process.env.DB_User}:${process.env.DB_Pass}@cluster0.o8c7bsg.mongodb.net/?retryWrites=true&w=majority`;
 // console.log(uri);
@@ -111,6 +111,17 @@ async function run() {
       const result = await wishlistCollection.find(query).toArray();
       res.send(result)
     });
+
+    app.get('/blogDetails/:id', async(req, res) =>{
+      const id = req.params.id;
+      console.log(id);
+      
+
+      const query = {_id: new ObjectId(id)}
+
+      const result = await blogCollection.findOne(query);
+      res.send(result)
+    })
 
     app.post("/wishlist", async (req, res) => {
       const newWish = req.body;
